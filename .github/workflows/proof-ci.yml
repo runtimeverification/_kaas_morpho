@@ -56,9 +56,9 @@
         - name: Checkout CLIENT Code
           uses: actions/checkout@v4
           with:
-            repository: '<organization>/<repository>'
+            repository: '${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}'
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
-            path: '<repository>'
+            path: '${{ github.event.inputs.repository }}'
             ref: ${{ github.event.inputs.branch_name }}
             fetch-depth: 0
             submodules: 'recursive'
@@ -68,26 +68,12 @@
           with:
             github-token: ${{ secrets.JENKINS_GITHUB_PAT }}
           
-        ####    
-        # - name: Get Kontrol Version
-        #   id: kontrol-version
-        #   shell: bash
-        #   run: |
-        #     # Step into the Client Code Top level Directory or whereever the versions.json file is located
-        #     pushd <repository>/
-        #     echo "KONTROL_VERSION=$(cat versions.json | jq -r .kontrol)" > "$GITHUB_OUTPUT"
-        
-        # For now installation of Kontrol runs into rate limiting issues using kup/nix
-        # - name: Install Kontrol
-        #   uses: runtimeverification/install-kontrol@v1.0.1
-        #   with:
-        #     version: "v${{ steps.kontrol-version.outputs.KONTROL_VERSION }}"
-        ####
         - name: "Download KCFG Cache Results"
           shell: bash
           run: |
-            pushd <repository>/ > /dev/null
-            kaas-cli download --token ${{ secrets.CLIENT_TOKEN }} <Github Org>/<Repo Name>:<tag> -d <Out Folder in foundry.toml>
+            pushd ${{ github.event.inputs.repository }}/ > /dev/null
+            tag=$(git rev-parse --short HEAD~ || echo "latest")
+            kaas-cli download --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
       
         # Some Setups Require using `pushd` to setup execution in the correct client directory
         # Some Setups require an additional step to pull all the necessary files, examples are `npm install` or `git submodule update --recursive` 
@@ -95,7 +81,7 @@
           shell: bash
           run: |
             # Step into Runtime Folder
-            pushd <repository>/ > /dev/null
+            pushd ${{ github.event.inputs.repository }}/ > /dev/null
             # Call Kontrol Directly and using 'local' mode or do not specify local/dev to run in a container
             ./test/kontrol/scripts/run-kontrol.sh ${{ github.event.inputs.extra_args }}
     
@@ -104,8 +90,9 @@
           shell: bash
           run: |
             # Enter directory where `out` folder is generated 
-            pushd ./<repository> > /dev/null
-            kaas-cli upload --token ${{ secrets.CLIENT_TOKEN }} <Github Org>/<Repo Name>:<tag> -d <Out Folder in foundry.toml>
+            pushd ./${{ github.event.inputs.repository }} > /dev/null
+            tag=$(git rev-parse --short HEAD || echo "latest")
+            kaas-cli upload --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
       
         - name: 'Upload Results to GH Summary'
           if: always()

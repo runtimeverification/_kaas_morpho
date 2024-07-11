@@ -1,32 +1,31 @@
 ---
 ######################
-# THIS IS AN EXAMPLE #
+# EXAMPLE WORKFLOW
 ######################
-# This workflow is to be copied to a client repository or used an example for how to call the compute API and run tests. 
-#   This is not to be used in the _kaas repository to run proofs. That is done by example-kaas-setup.yml.
-#   Intended as a CI example targeting a user/client using GH workflows. 
+# This workflow demonstrates how to call the compute API and run tests.
+# It is intended for client repositories using GitHub Actions.
+# Note: Do not use this in the _kaas repository; use example-kaas-setup.yml instead.
 ######################
-# Note: Important distinction between github context
-#   ${{ github.sha }} in a pull request versus using ${{ github.evnt.pull_request.head.sh }}
-#   TLDR:
-#   The ${{ github.sha }} context in GitHub Actions provides the SHA of the commit that triggered the workflow. However, if your workflow is triggered by a pull request event, ${{ github.sha }} will be the SHA of the merge commit that GitHub creates for the PR, not the SHA of the latest commit in the PR branch. This is why you're seeing a different SHA when you run git log.
-  
-#   If you want the SHA of the latest commit in the PR branch, you can use ${{ github.event.pull_request.head.sha }} instead. 
-#     This will give you the SHA of the latest commit in the PR branch, which should match what you see when you run git log.
-#  OR use a simple bash script
-#  
-
-
+# Important:
+# - ${{ github.sha }} in a pull request refers to the merge commit SHA.
+# - Use ${{ github.event.pull_request.head.sha }} for the latest commit SHA in the PR branch.
 ######################
 
 name: "Test Proofs"
 on:
+  workflow_dispatch:
+    inputs: 
+      branch_name:
+        type: string
+        required: true
+        description: "The branch name to run the tests on"
+      org
   pull_request:
     branches:
       - main
 jobs:
   test:
-    runs-on: [self-hosted, linux, flyweight]
+    runs-on: [self-hosted, linux, flyweight] # If  client uses github Public repositories this needs to be [ubuntu-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,15 +40,15 @@ jobs:
             -w "%{http_code}" \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.JENKINS_GITHUB_PAT }}" \
-            https://api.github.com/repos/runtimeverification/_kaas< repo name >/actions/workflows/< client >-ci.yml/dispatches \
+            https://api.github.com/repos/runtimeverification/_kaas_morpho/actions/workflows/proof-ci.yml/dispatches \
             -d '{
               "ref": "master",
               "inputs": {
                 "branch_name": "'"${{ github.event.pull_request.head.sha }}"'",
                 "extra_args": "script",
                 "statuses_sha": "'$sha'",
-                "org": "runtimeverification",
-                "repository": "_audits_< repo name >",
+                "org": "${{ github.event.inputs.org || 'runtimeverification' }}",
+                "repository": "${{ github.event.inputs.repository || '_kaas_morpho' }}",
                 "auth_token": "'"${{ secrets.JENKINS_GITHUB_PAT }}"'"
               }
             }')
@@ -63,4 +62,3 @@ jobs:
               echo "There was a server error: $response"
               exit 1
             fi
-            
