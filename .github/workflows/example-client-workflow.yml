@@ -8,18 +8,12 @@
 ######################
 # Important:
 # - ${{ github.sha }} in a pull request refers to the merge commit SHA.
-# - Use ${{ github.event.pull_request.head.sha }} for the latest commit SHA in the PR branch.
+# - Use ${{ github.event.pull_request.head.sha }} for the latest commit in a git Branch.
 ######################
 
 name: "Test Proofs"
 on:
   workflow_dispatch:
-    inputs: 
-      branch_name:
-        type: string
-        required: true
-        description: "The branch name to run the tests on"
-      org
   pull_request:
     branches:
       - main
