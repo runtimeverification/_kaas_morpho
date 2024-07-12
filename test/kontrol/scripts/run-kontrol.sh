@@ -151,6 +151,9 @@ results[0]=$?
 kontrol_prove
 results[1]=$?
 
+# Generate Kontrol Show
+run kontrol show 
+
 get_log_results
 
 # Now you can use ${results[0]} and ${results[1]}
