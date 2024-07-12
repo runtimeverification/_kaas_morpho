@@ -93,6 +93,7 @@
         #     pushd ./${{ github.event.inputs.repository }} > /dev/null
         #     tag=$(git rev-parse --short HEAD || echo "latest")
         #     kaas-cli upload --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
+        # kaas-cli upload --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:latest -d ./out
       
         - name: 'Upload Results to GH Summary'
           if: always()
