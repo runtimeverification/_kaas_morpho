@@ -152,7 +152,8 @@ kontrol_prove
 results[1]=$?
 
 # Generate Kontrol Show
-run kontrol show 
+run kontrol show CounterTest.prove_SetNumber
+results[2]=$?
 
 get_log_results
 
