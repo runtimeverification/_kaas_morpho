@@ -38,7 +38,7 @@ jobs:
             -d '{
               "ref": "master",
               "inputs": {
-                "branch_name": "'"${{ github.event.pull_request.head.sha }}"'",
+                "branch_name": "'"${{ github.event.pull_request.head.sha || github.sha }}"'",
                 "extra_args": "script",
                 "statuses_sha": "'$sha'",
                 "org": "${{ github.event.inputs.org || 'runtimeverification' }}",
