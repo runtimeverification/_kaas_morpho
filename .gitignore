@@ -1,3 +1,4 @@
 kontrol/logs
 out/
 cache/
+.DS_Store
