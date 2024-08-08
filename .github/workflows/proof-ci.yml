@@ -68,12 +68,12 @@
           with:
             github-token: ${{ secrets.JENKINS_GITHUB_PAT }}
           
-        # - name: "Download KCFG Cache Results"
-        #   shell: bash
-        #   run: |
-        #     pushd ${{ github.event.inputs.repository }}/ > /dev/null
-        #     tag=$(git rev-parse --short HEAD~ || echo "latest")
-        #     kaas-cli download --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
+        - name: "Download KCFG Cache Results"
+          shell: bash
+          run: |
+            pushd ${{ github.event.inputs.repository }}/ > /dev/null
+            tag=$(git rev-parse --short HEAD~)
+            kaas-cli download --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
       
         # Some Setups Require using `pushd` to setup execution in the correct client directory
         # Some Setups require an additional step to pull all the necessary files, examples are `npm install` or `git submodule update --recursive` 
@@ -85,15 +85,14 @@
             # Call Kontrol Directly and using 'local' mode or do not specify local/dev to run in a container
             ./test/kontrol/scripts/run-kontrol.sh ${{ github.event.inputs.extra_args }}
     
-        # - name: 'KaaS Cache Upload'
-        #   if: always()
-        #   shell: bash
-        #   run: |
-        #     # Enter directory where `out` folder is generated 
-        #     pushd ./${{ github.event.inputs.repository }} > /dev/null
-        #     tag=$(git rev-parse --short HEAD || echo "latest")
-        #     kaas-cli upload --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
-        # kaas-cli upload --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:latest -d ./out
+        - name: 'KaaS Cache Upload'
+          if: always()
+          shell: bash
+          run: |
+            # Enter directory where `out` folder is generated 
+            pushd ./${{ github.event.inputs.repository }} > /dev/null
+            tag=$(git rev-parse --short HEAD)
+            kaas-cli upload --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
       
         - name: 'Upload Results to GH Summary'
           if: always()
