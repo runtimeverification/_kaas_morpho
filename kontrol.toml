@@ -2,14 +2,14 @@
 foundry-project-root       = '.'
 regen                      = false
 rekompile                  = false
-verbose                    = true
+verbose                    = false
 debug                      = false
 require                    = 'test/kontrol/counter-lemmas.k'
 module-import              = 'CounterTest:COUNTER-LEMMAS'
 
 [prove.default]
 foundry-project-root       = '.'
-verbose                    = true
+verbose                    = false
 debug                      = false
 max-depth                  = 1000000
 max-iterations             = 1000000
