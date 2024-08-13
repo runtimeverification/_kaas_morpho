@@ -16,28 +16,14 @@ parse_args "$@"
 kontrol_build() {
   notif "Kontrol Build"
   # shellcheck disable=SC2086
-  run kontrol build \
-    --verbose \
-    --require $lemmas \
-    --module-import $module \
-    $rekompile
+  run kontrol build
   return $?
 }
 
 kontrol_prove() {
   notif "Kontrol Prove"
   # shellcheck disable=SC2086
-  run kontrol prove \
-    --max-depth $max_depth \
-    --max-iterations $max_iterations \
-    --smt-timeout $smt_timeout \
-    --workers $workers \
-    $reinit \
-    $bug_report \
-    $break_on_calls \
-    $auto_abstract \
-    $tests \
-    $use_booster
+  run kontrol prove
   return $?
 }
 
@@ -75,65 +61,6 @@ get_log_results(){
     fi
 }
 
-#########################
-# kontrol build options #
-#########################
-# NOTE: This script has a recurring pattern of setting and unsetting variables,
-# such as `rekompile`. Such a pattern is intended for easy use while locally
-# developing and executing the proofs via this script. Comment/uncomment the
-# empty assignment to activate/deactivate the corresponding flag
-lemmas=test/kontrol/counter-lemmas.k
-base_module=COUNTER-LEMMAS
-module=CounterTest:$base_module
-rekompile=--rekompile
-rekompile=
-regen=--regen
-# shellcheck disable=SC2034
-regen=
-
-#################################
-# Tests to symbolically execute #
-#################################
-test_list=()
-if [ "$SCRIPT_TESTS" == true ]; then
-    # Here go the list of tests to execute with the `script` option
-    test_list=( "CounterTest.prove_SetNumber" )
-elif [ "$CUSTOM_TESTS" != 0 ]; then
-    test_list=( "${@:${CUSTOM_TESTS}}" )
-fi
-tests=""
-# If test_list is empty, tests will be empty as well
-# This will make kontrol execute any `test`, `prove` or `check` prefixed-function
-# under the foundry-defined `test` directory
-for test_name in "${test_list[@]}"; do
-    tests+="--match-test $test_name "
-done
-
-#########################
-# kontrol prove options #
-#########################
-max_depth=1000000
-max_iterations=1000000
-smt_timeout=100000
-max_workers=16 # Should be at most (M - 8) / 8 in a machine with M GB of RAM
-# workers is the minimum between max_workers and the length of test_list
-# unless no test arguments are provided, in which case we default to max_workers
-if [ "$CUSTOM_TESTS" == 0 ] && [ "$SCRIPT_TESTS" == false ]; then
-    workers=${max_workers}
-else
-    workers=$((${#test_list[@]}>max_workers ? max_workers : ${#test_list[@]}))
-fi
-reinit=--reinit
-reinit=
-break_on_calls=--break-on-calls
-break_on_calls=
-auto_abstract=--auto-abstract-gas
-auto_abstract=
-bug_report=--bug-report
-bug_report=
-use_booster=--no-use-booster
-use_booster=
-
 #############
 # RUN TESTS #
 #############
@@ -150,10 +77,6 @@ results[0]=$?
 # Run kontrol_prove and store the result
 kontrol_prove
 results[1]=$?
-
-# Generate Kontrol Show
-run kontrol show CounterTest.prove_SetNumber
-results[2]=$?
 
 get_log_results
 
