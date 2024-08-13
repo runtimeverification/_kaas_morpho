@@ -1,12 +1,11 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
 import {Morpho} from "lib/morpho-blue/src/Morpho.sol";
 import {ErrorsLib} from "lib/morpho-blue/src/libraries/ErrorsLib.sol";
 
-// "./libraries/ErrorsLib.sol
-
+/// @author Adapted from https://github.com/morpho-org/morpho-blue/blob/3f018087e024538486858e87499a10f6283a9528/test/forge/integration/OnlyOwnerIntegrationTest.sol#L21
 contract MorphoTest is Test {
     Morpho public morpho;
 
