@@ -5,5 +5,5 @@
 	path = lib/kontrol-cheatcodes
 	url = https://github.com/runtimeverification/kontrol-cheatcodes
 [submodule "lib/morpho-blue"]
-	path = morpho-blue
+	path = lib/morpho-blue
 	url = https://github.com/morpho-org/morpho-blue.git
