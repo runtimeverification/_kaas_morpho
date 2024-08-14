@@ -14,6 +14,11 @@
 name: "Test Proofs"
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run proofs on'
+        required: false
+        default: 'master'
   pull_request:
     branches:
       - main
@@ -36,7 +41,7 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.JENKINS_GITHUB_PAT }}" \
             https://api.github.com/repos/runtimeverification/_kaas_morpho/actions/workflows/proof-ci.yml/dispatches \
             -d '{
-              "ref": "master",
+              "ref": "'"${{ github.event.inputs.branch || 'master' }}"'",
               "inputs": {
                 "branch_name": "'"${{ github.event.pull_request.head.sha || github.sha }}"'",
                 "extra_args": "script",
