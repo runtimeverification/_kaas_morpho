@@ -21,6 +21,10 @@
         auth_token:
           description: 'Auth Token w/ commit statuses permissions for reporting status'
           required: false
+        skip_status_report:
+          description: 'Skip status report to github'
+          required: false
+          default: false
   
   # Stop in progress workflows on the same branch and same workflow to use latest committed code
   concurrency:
@@ -39,6 +43,7 @@
             fetch-depth: 0
 
         - name: Report Pending Status
+          if: ${{ github.event.inputs.skip_status_report == 'false' }}
           run: |
             curl -L -X POST \
               -H "Accept: application/vnd.github+json" \
@@ -56,7 +61,7 @@
         - name: Checkout CLIENT Code
           uses: actions/checkout@v4
           with:
-            repository: 'morpho-org/morpho-blue'
+            repository: '${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}'
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
             path: '${{ github.event.inputs.repository }}'
             ref: ${{ github.event.inputs.branch_name }}
@@ -103,7 +108,7 @@
             retention-days: 14
 
         - name: Report Pass Status
-          if: always() && success()
+          if: always() && success() && ${{ github.event.inputs.skip_status_report == 'false' }}
           run: |
             curl -L -X POST \
               -H "Accept: application/vnd.github+json" \
@@ -118,7 +123,7 @@
               }'
 
         - name: Report Failure Status
-          if: always() && failure() || cancelled()
+          if: always() && failure() || cancelled() && ${{ github.event.inputs.skip_status_report == 'false' }}
           run: |
             curl -L \
               -X POST \
