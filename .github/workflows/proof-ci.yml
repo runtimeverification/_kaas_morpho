@@ -77,7 +77,7 @@
           shell: bash
           run: |
             tag=$(git hash-object kontrol.toml)
-            kaas-cli download --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
+            kaas-cli download --url kaas-sandbox.runtimeverification.com --token ${{ secrets.CLIENT_TOKEN }} @morpho/${{ github.event.inputs.repository }}:$tag -d ./out
       
         # Some Setups Require using `pushd` to setup execution in the correct client directory
         # Some Setups require an additional step to pull all the necessary files, examples are `npm install` or `git submodule update --recursive` 
@@ -94,7 +94,7 @@
           run: |
             # Enter directory where `out` folder is generated 
             tag=$(git hash-object kontrol.toml)
-            kaas-cli upload --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
+            kaas-cli upload --url kaas-sandbox.runtimeverification.com --token ${{ secrets.CLIENT_TOKEN }} @morpho/${{ github.event.inputs.repository }}:$tag -d ./out
       
         - name: 'Upload Results to GH Summary'
           if: always()
