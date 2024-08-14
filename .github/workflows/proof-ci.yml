@@ -64,8 +64,8 @@
           with:
             repository: '${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}'
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
-            path: _kaas_morpho/lib/'${{ github.event.inputs.repository }}'
-            ref: ${{ github.event.inputs.branch_name }}
+            path: ./lib/'${{ github.event.inputs.repository }}'
+            # ref: ${{ github.event.inputs.branch_name }}
             fetch-depth: 0
             submodules: 'recursive'
         
