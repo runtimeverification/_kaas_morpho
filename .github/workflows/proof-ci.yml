@@ -97,7 +97,7 @@
             pushd _kaas_morpho/ > /dev/null
             # Enter directory where `out` folder is generated 
             tag=$(git hash-object kontrol.toml)
-            kaas-cli upload --url https://kaas-sandbox.runtimeverification.com --token ${{ secrets.VAULT_TOKEN }} "@morpho/${{ github.event.inputs.repository }}:$tag" -d ./out
+            kaas-cli upload --url https://kaas-sandbox.runtimeverification.com --token ${{ secrets.VAULT_TOKEN }} @morpho/${{ github.event.inputs.repository }}:$tag -d ./out
       
         - name: 'Upload Results to GH Summary'
           if: always()
