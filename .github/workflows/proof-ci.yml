@@ -90,14 +90,14 @@
             # Call Kontrol Directly and using 'local' mode or do not specify local/dev to run in a container
             ./test/kontrol/scripts/run-kontrol.sh ${{ github.event.inputs.extra_args }}
     
-        - name: 'KaaS Cache Upload'
-          if: always()
-          shell: bash
-          run: |
-            pushd _kaas_morpho/ > /dev/null
-            # Enter directory where `out` folder is generated 
-            tag=$(git hash-object kontrol.toml)
-            kaas-cli upload --url https://kaas-sandbox.runtimeverification.com --token ${{ secrets.VAULT_TOKEN }} @morpho/${{ github.event.inputs.repository }}:$tag -d ./out
+        # - name: 'KaaS Cache Upload'
+        #   if: always()
+        #   shell: bash
+        #   run: |
+        #     pushd _kaas_morpho/ > /dev/null
+        #     # Enter directory where `out` folder is generated 
+        #     tag=$(git hash-object kontrol.toml)
+        #     kaas-cli upload --url https://kaas-sandbox.runtimeverification.com --token ${{ secrets.VAULT_TOKEN }} @morpho/${{ github.event.inputs.repository }}:$tag -d ./out
       
         - name: 'Upload Results to GH Summary'
           if: always()
