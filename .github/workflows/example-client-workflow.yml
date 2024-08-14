@@ -52,7 +52,6 @@ jobs:
               "ref": "'"${{ github.event.inputs.branch || 'master' }}"'",
               "inputs": {
                 "branch_name": "'"${{ github.event.pull_request.head.sha || github.sha }}"'",
-                "extra_args": "script",
                 "statuses_sha": "'$sha'",
                 "org": "${{ github.event.inputs.org || 'runtimeverification' }}",
                 "repository": "${{ github.event.inputs.repository || '_kaas_morpho' }}",
