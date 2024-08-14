@@ -41,6 +41,7 @@
           with:
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
             fetch-depth: 0
+            path: _kaas_morpho
 
         - name: Report Pending Status
           if: ${{ github.event.inputs.skip_status_report == 'false' }}
