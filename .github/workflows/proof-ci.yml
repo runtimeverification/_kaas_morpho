@@ -76,7 +76,7 @@
         - name: "Download KCFG Cache Results"
           shell: bash
           run: |
-            tag=$(git rev-parse --short HEAD~)
+            tag=$(git hash-object kontrol.toml)
             kaas-cli download --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
       
         # Some Setups Require using `pushd` to setup execution in the correct client directory
@@ -93,7 +93,7 @@
           shell: bash
           run: |
             # Enter directory where `out` folder is generated 
-            tag=$(git rev-parse --short HEAD)
+            tag=$(git hash-object kontrol.toml)
             kaas-cli upload --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
       
         - name: 'Upload Results to GH Summary'
