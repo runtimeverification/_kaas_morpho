@@ -1,19 +1,19 @@
 [build.default]
 foundry-project-root       = '.'
 regen                      = false
-rekompile                  = false
-verbose                    = false
+rekompile                  = true
+verbose                    = true
 debug                      = false
 require                    = 'test/kontrol/counter-lemmas.k'
 module-import              = 'CounterTest:COUNTER-LEMMAS'
 
 [prove.default]
 foundry-project-root       = '.'
-verbose                    = false
+verbose                    = true
 debug                      = false
 max-depth                  = 1000000
 max-iterations             = 1000000
-reinit                     = false
+reinit                     = true
 cse                        = false
 workers                    = 4
 failure-information        = true

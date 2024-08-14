@@ -73,13 +73,13 @@
           uses: runtimeverification/install-kaas@v0.2.1
           with:
             github-token: ${{ secrets.JENKINS_GITHUB_PAT }}
-          
-        - name: "Download KCFG Cache Results"
-          shell: bash
-          run: |
-            pushd _kaas_morpho/ > /dev/null
-            tag=$(git hash-object kontrol.toml)
-            kaas-cli download --url https://kaas-sandbox.runtimeverification.com --token ${{ secrets.VAULT_TOKEN }} @morpho/${{ github.event.inputs.repository }}:$tag -d ./out
+
+        # - name: "Download KCFG Cache Results"
+        #   shell: bash
+        #   run: |
+        #     pushd _kaas_morpho/ > /dev/null
+        #     tag=$(git hash-object kontrol.toml)
+        #     kaas-cli download --url https://kaas-sandbox.runtimeverification.com --token ${{ secrets.VAULT_TOKEN }} @morpho/${{ github.event.inputs.repository }}:$tag -d ./out
       
         # Some Setups Require using `pushd` to setup execution in the correct client directory
         # Some Setups require an additional step to pull all the necessary files, examples are `npm install` or `git submodule update --recursive` 
