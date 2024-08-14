@@ -76,6 +76,8 @@
         - name: "Download KCFG Cache Results"
           shell: bash
           run: |
+            pushd _kaas_morpho/ > /dev/null
+            ls -l
             tag=$(git hash-object kontrol.toml)
             kaas-cli download --url https://kaas-sandbox.runtimeverification.com --token ${{ secrets.CLIENT_TOKEN }} @morpho/${{ github.event.inputs.repository }}:$tag -d ./out
       
@@ -92,6 +94,7 @@
           if: always()
           shell: bash
           run: |
+            pushd _kaas_morpho/ > /dev/null
             # Enter directory where `out` folder is generated 
             tag=$(git hash-object kontrol.toml)
             kaas-cli upload --url https://kaas-sandbox.runtimeverification.com --token ${{ secrets.CLIENT_TOKEN }} @morpho/${{ github.event.inputs.repository }}:$tag -d ./out
