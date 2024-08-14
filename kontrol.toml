@@ -1,0 +1,37 @@
+[build.default]
+foundry-project-root       = '.'
+regen                      = false
+rekompile                  = false
+verbose                    = false
+debug                      = false
+require                    = 'test/kontrol/counter-lemmas.k'
+module-import              = 'CounterTest:COUNTER-LEMMAS'
+
+[prove.default]
+foundry-project-root       = '.'
+verbose                    = false
+debug                      = false
+max-depth                  = 1000000
+max-iterations             = 1000000
+reinit                     = false
+cse                        = false
+workers                    = 4
+failure-information        = true
+counterexample-information = true
+minimize-proofs            = false
+fail-fast                  = true
+smt-timeout                = 100000
+break-every-step           = false
+break-on-jumpi             = false
+break-on-calls             = false
+break-on-storage           = false
+break-on-basic-blocks      = false
+break-on-cheatcodes        = false
+run-constructor            = false
+match-test                 = ['CounterTest.prove_SetNumber', 'proveSetOwnerWhenNotOwner', 'proveDeployWithAddressZero']
+# bug-report               = disabled by default
+
+[show.default]
+foundry-project-root       = '.'
+verbose                    = true
+debug                      = false

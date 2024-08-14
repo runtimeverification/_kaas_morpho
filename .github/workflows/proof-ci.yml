@@ -21,6 +21,10 @@
         auth_token:
           description: 'Auth Token w/ commit statuses permissions for reporting status'
           required: false
+        skip_status_report:
+          description: 'Skip status report to github'
+          required: false
+          default: false
   
   # Stop in progress workflows on the same branch and same workflow to use latest committed code
   concurrency:
@@ -37,8 +41,10 @@
           with:
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
             fetch-depth: 0
+            path: _kaas_morpho
 
         - name: Report Pending Status
+          if: ${{ github.event.inputs.skip_status_report == 'false' }}
           run: |
             curl -L -X POST \
               -H "Accept: application/vnd.github+json" \
@@ -58,8 +64,8 @@
           with:
             repository: '${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}'
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
-            path: '${{ github.event.inputs.repository }}'
-            ref: ${{ github.event.inputs.branch_name }}
+            path: ./lib/'${{ github.event.inputs.repository }}'
+            # ref: ${{ github.event.inputs.branch_name }}
             fetch-depth: 0
             submodules: 'recursive'
         
@@ -71,9 +77,9 @@
         - name: "Download KCFG Cache Results"
           shell: bash
           run: |
-            pushd ${{ github.event.inputs.repository }}/ > /dev/null
-            tag=$(git rev-parse --short HEAD~)
-            kaas-cli download --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
+            pushd _kaas_morpho/ > /dev/null
+            tag=$(git hash-object kontrol.toml)
+            kaas-cli download --url https://kaas-sandbox.runtimeverification.com --token ${{ secrets.VAULT_TOKEN }} @morpho/${{ github.event.inputs.repository }}:$tag -d ./out
       
         # Some Setups Require using `pushd` to setup execution in the correct client directory
         # Some Setups require an additional step to pull all the necessary files, examples are `npm install` or `git submodule update --recursive` 
@@ -81,7 +87,6 @@
           shell: bash
           run: |
             # Step into Runtime Folder
-            pushd ${{ github.event.inputs.repository }}/ > /dev/null
             # Call Kontrol Directly and using 'local' mode or do not specify local/dev to run in a container
             ./test/kontrol/scripts/run-kontrol.sh ${{ github.event.inputs.extra_args }}
     
@@ -89,10 +94,10 @@
           if: always()
           shell: bash
           run: |
+            pushd _kaas_morpho/ > /dev/null
             # Enter directory where `out` folder is generated 
-            pushd ./${{ github.event.inputs.repository }} > /dev/null
-            tag=$(git rev-parse --short HEAD)
-            kaas-cli upload --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
+            tag=$(git hash-object kontrol.toml)
+            kaas-cli upload --url https://kaas-sandbox.runtimeverification.com --token ${{ secrets.VAULT_TOKEN }} @morpho/${{ github.event.inputs.repository }}:$tag -d ./out
       
         - name: 'Upload Results to GH Summary'
           if: always()
@@ -103,7 +108,7 @@
             retention-days: 14
 
         - name: Report Pass Status
-          if: always() && success()
+          if: always() && success() && ${{ github.event.inputs.skip_status_report == 'false' }}
           run: |
             curl -L -X POST \
               -H "Accept: application/vnd.github+json" \
@@ -118,7 +123,7 @@
               }'
 
         - name: Report Failure Status
-          if: always() && failure() || cancelled()
+          if: always() && failure() || cancelled() && ${{ github.event.inputs.skip_status_report == 'false' }}
           run: |
             curl -L \
               -X POST \

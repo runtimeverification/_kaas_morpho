@@ -19,6 +19,14 @@ on:
         description: 'Branch to run proofs on'
         required: false
         default: 'master'
+      org:
+        description: 'Organization to run proofs on'
+        required: false
+        default: 'morpho-org'
+      repository:
+        description: 'Repository to run proofs on'
+        required: false
+        default: 'morpho-blue'
   pull_request:
     branches:
       - main
