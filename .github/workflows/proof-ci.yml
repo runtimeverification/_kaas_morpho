@@ -24,7 +24,7 @@
         skip_status_report:
           description: 'Skip status report to github'
           required: false
-          default: false
+          default: "false"
   
   # Stop in progress workflows on the same branch and same workflow to use latest committed code
   concurrency:
@@ -41,7 +41,7 @@
           with:
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
             fetch-depth: 0
-            path: _kaas_morpho
+            path: .
 
         - name: Report Pending Status
           if: ${{ github.event.inputs.skip_status_report == 'false' }}
