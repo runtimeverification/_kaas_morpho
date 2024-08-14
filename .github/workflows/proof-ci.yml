@@ -63,7 +63,7 @@
           with:
             repository: '${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}'
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
-            path: '${{ github.event.inputs.repository }}'
+            path: _kaas_morpho/lib/'${{ github.event.inputs.repository }}'
             ref: ${{ github.event.inputs.branch_name }}
             fetch-depth: 0
             submodules: 'recursive'
@@ -76,7 +76,6 @@
         - name: "Download KCFG Cache Results"
           shell: bash
           run: |
-            pushd ${{ github.event.inputs.repository }}/ > /dev/null
             tag=$(git rev-parse --short HEAD~)
             kaas-cli download --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
       
@@ -86,7 +85,6 @@
           shell: bash
           run: |
             # Step into Runtime Folder
-            pushd ${{ github.event.inputs.repository }}/ > /dev/null
             # Call Kontrol Directly and using 'local' mode or do not specify local/dev to run in a container
             ./test/kontrol/scripts/run-kontrol.sh ${{ github.event.inputs.extra_args }}
     
@@ -95,7 +93,6 @@
           shell: bash
           run: |
             # Enter directory where `out` folder is generated 
-            pushd ./${{ github.event.inputs.repository }} > /dev/null
             tag=$(git rev-parse --short HEAD)
             kaas-cli upload --token ${{ secrets.CLIENT_TOKEN }} ${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}:$tag -d ./out
       
