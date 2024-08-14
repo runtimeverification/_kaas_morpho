@@ -91,7 +91,6 @@ elif [ ${results[0]} -ne 0 ]; then
 elif [ ${results[1]} -ne 0 ]; then
   echo "Kontrol Prove Failed"
   exit 2
-  # Handle failure
 else
   echo "Kontrol Passed"
 fi
