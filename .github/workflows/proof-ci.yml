@@ -56,7 +56,7 @@
         - name: Checkout CLIENT Code
           uses: actions/checkout@v4
           with:
-            repository: '${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}'
+            repository: 'morpho-org/morpho-blue'
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
             path: '${{ github.event.inputs.repository }}'
             ref: ${{ github.event.inputs.branch_name }}
