@@ -64,7 +64,7 @@
           with:
             repository: '${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}'
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
-            path: ./lib/'${{ github.event.inputs.repository }}'
+            path: ./lib/${{ github.event.inputs.repository }}
             # ref: ${{ github.event.inputs.branch_name }}
             fetch-depth: 0
             submodules: 'recursive'
