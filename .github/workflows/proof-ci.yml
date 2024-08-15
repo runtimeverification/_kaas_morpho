@@ -12,7 +12,8 @@
         repository:
           description: 'Repository to report statuses back to'
           required: false
-  
+    pull_request:
+
   # Stop in progress workflows on the same branch and same workflow to use latest committed code
   concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.inputs.branch_name }}
@@ -29,6 +30,13 @@
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
             fetch-depth: 0
             path: .
+
+            
+      # Set default values for org and repository if not provided
+      - name: 'Set default values'
+        run: |
+          echo "ORG=${{ github.event.inputs.org || 'morpho-org' }}" >> $GITHUB_ENV
+          echo "REPOSITORY=${{ github.event.inputs.repository || 'morpho-blue' }}" >> $GITHUB_ENV
 
         # - name: Report Pending Status
         #   if: ${{ github.event.inputs.skip_status_report == 'false' }}
@@ -49,10 +57,10 @@
         - name: Checkout CLIENT Code
           uses: actions/checkout@v4
           with:
-            repository: '${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}'
+            repository: '${{ env.ORG }}/${{ env.REPOSITORY }}'
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
-            path: ./lib/${{ github.event.inputs.repository }}
-            ref: ${{ github.event.inputs.branch_name }}
+            path: ./lib/${{ env.REPOSITORY }}
+            ref: ${{ github.event.inputs.branch_name || github.head_ref }}
             fetch-depth: 0
             submodules: 'recursive'
         
@@ -74,7 +82,7 @@
           run: |
             # Step into Runtime Folder
             # Call Kontrol Directly and using 'local' mode or do not specify local/dev to run in a container
-            ./test/kontrol/scripts/run-kontrol.sh ${{ github.event.inputs.extra_args }}
+            ./test/kontrol/scripts/run-kontrol.sh
 
         - name: 'KaaS Cache Upload'
           if: always()
@@ -83,6 +91,7 @@
             # Enter directory where `out` folder is generated 
             tag=$(git hash-object kontrol.toml)
             kaas-cli upload --token ${{ secrets.VAULT_TOKEN }} @morpho/demo:$tag -d ./out
+        
         - name: Find Results File
           if: always()
           shell: bash
