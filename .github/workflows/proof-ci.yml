@@ -5,7 +5,7 @@
       inputs:
         branch_name:
           description: 'Branch Name of Clients code to Clone'
-          required: true
+          required: false
         org:
           description: 'Organization to report statuses back to'
           required: false
