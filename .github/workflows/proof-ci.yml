@@ -60,7 +60,7 @@
             repository: '${{ env.ORG }}/${{ env.REPOSITORY }}'
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
             path: ./lib/${{ env.REPOSITORY }}
-            ref: ${{ github.event.inputs.branch_name || github.head_ref }}
+            ref: ${{ github.event.inputs.branch_name || 'main' }}
             fetch-depth: 0
             submodules: 'recursive'
         
