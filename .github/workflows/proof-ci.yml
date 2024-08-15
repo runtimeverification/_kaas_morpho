@@ -6,22 +6,12 @@
         branch_name:
           description: 'Branch Name of Clients code to Clone'
           required: true
-        statuses_sha:
-          description: 'SHA of the commit to report status back to'
-          required: false
         org:
           description: 'Organization to report statuses back to'
           required: false
         repository:
           description: 'Repository to report statuses back to'
           required: false
-        auth_token:
-          description: 'Auth Token w/ commit statuses permissions for reporting status'
-          required: false
-        skip_status_report:
-          description: 'Skip status report to github'
-          required: false
-          default: "false"
   
   # Stop in progress workflows on the same branch and same workflow to use latest committed code
   concurrency:
@@ -62,7 +52,7 @@
             repository: '${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}'
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
             path: ./lib/${{ github.event.inputs.repository }}
-            # ref: ${{ github.event.inputs.branch_name }}
+            ref: ${{ github.event.inputs.branch_name }}
             fetch-depth: 0
             submodules: 'recursive'
         
