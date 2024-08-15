@@ -4,8 +4,8 @@ regen                      = false
 rekompile                  = false
 verbose                    = true
 debug                      = false
-require                    = 'test/kontrol/counter-lemmas.k'
-module-import              = 'CounterTest:COUNTER-LEMMAS'
+require                    = 'test/kontrol/morpho-lemmas.k'
+module-import              = 'KontrolRepayIntegrationTest:MORPHO-LEMMAS'
 
 [prove.default]
 symbolic-immutables        = true

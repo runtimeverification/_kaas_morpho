@@ -1,7 +1,6 @@
 requires "foundry.md"
 
-
-module COUNTER-LEMMAS
+module MORPHO-LEMMAS
     imports EVM
     imports FOUNDRY
     imports INT-SYMBOLIC
@@ -443,7 +442,9 @@ module COUNTER-LEMMAS
          andBool Y <Int 2 ^Int ( log2Int(Z) /Int 2 )
         [simplification, concrete(Z)]
 
+    //
     // NEW LEMMAS
+    //
 
     rule [symb-program-index]:
       M:Bytes [ N:Int ] => #asWord ( #range(M, N, 1) )
