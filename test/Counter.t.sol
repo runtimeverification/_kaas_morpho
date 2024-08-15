@@ -23,4 +23,11 @@ contract CounterTest is Test, KontrolCheats {
         counter.setNumber(x, inLuck);
         assert(counter.number() == x);
     }
+
+    function test_prove_bound(uint256 x) public pure {
+        vm.assume(x >= 55);
+        vm.assume( x<= 70);
+        assert(x >=55);
+        assert(x<=70);
+    }
 }
