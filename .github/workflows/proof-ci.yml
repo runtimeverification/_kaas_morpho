@@ -32,11 +32,11 @@
             path: .
 
             
-      # Set default values for org and repository if not provided
-      - name: 'Set default values'
-        run: |
-          echo "ORG=${{ github.event.inputs.org || 'morpho-org' }}" >> $GITHUB_ENV
-          echo "REPOSITORY=${{ github.event.inputs.repository || 'morpho-blue' }}" >> $GITHUB_ENV
+        # Set default values for org and repository if not provided
+        - name: 'Set default values'
+          run: |
+            echo "ORG=${{ github.event.inputs.org || 'morpho-org' }}" >> $GITHUB_ENV
+            echo "REPOSITORY=${{ github.event.inputs.repository || 'morpho-blue' }}" >> $GITHUB_ENV
 
         # - name: Report Pending Status
         #   if: ${{ github.event.inputs.skip_status_report == 'false' }}
