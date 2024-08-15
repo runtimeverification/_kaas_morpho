@@ -142,8 +142,6 @@ contract KontrolRepayIntegrationTest is KontrolBaseTest {
         vm.prank(BORROWER);
         morpho.borrow(marketParams, 0, shares, BORROWER, RECEIVER);
 
-        return;
-
         loanToken.setBalance(address(this), assets);
 
         morpho.repay(marketParams, 0, shares, BORROWER, hex"");

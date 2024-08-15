@@ -1,7 +1,7 @@
 [build.default]
 foundry-project-root       = '.'
-regen                      = false
-rekompile                  = false
+regen                      = true
+rekompile                  = true
 verbose                    = true
 debug                      = false
 require                    = 'test/kontrol/morpho-lemmas.k'
