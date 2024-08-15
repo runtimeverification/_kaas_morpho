@@ -57,21 +57,21 @@ contract KontrolBaseTest is Test {
     MarketParams internal marketParams;
     Id internal id;
 
-        function bound(int256 x, int256 min, int256 max) internal pure virtual override returns (int256 result) {
+    function bound(int256 x, int256 min, int256 max) internal pure virtual override returns (int256 result) {
         //Overriding the bound function to use vm.assume instead of modifying the codebase.
         vm.assume(x >= min);
         vm.assume(x <= max);
         return x;
-        }
+    }
 
-        function bound(uint256 x, uint256 min, uint256 max) internal pure virtual override returns (uint256 result) {
+    function bound(uint256 x, uint256 min, uint256 max) internal pure virtual override returns (uint256 result) {
         //Overriding the bound function to use vm.assume instead of modifying the codebase.
         vm.assume(x >= min);
         vm.assume(x <= max);
         return x;
-        }
+    }
 
-        function setUp() public virtual {
+    function setUp() public virtual {
         vm.assume(block.timestamp < MAX_TIMESTAMP); // Required because the initial timestamp is symbolic in Kontrol
         vm.assume(block.timestamp > 2 ** 28);
 
