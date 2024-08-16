@@ -479,4 +479,8 @@ module MORPHO-LEMMAS
     //   requires 0 <=Int A
     //   [simplification]
 
+    rule bool2Word(B) *Int C <=Int A => notBool B orBool (B andBool C <=Int A)
+      requires 0 <=Int A
+      [simplification]
+
 endmodule
