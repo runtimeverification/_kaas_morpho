@@ -348,7 +348,7 @@ contract KontrolMorphoInvariantTest is KontrolInvariantTest {
 
     /* INVARIANTS */
 
-    function invariantSupplyShares() public {
+    function test_invariantSupplyShares() public {
         address[] memory users = targetSenders();
 
         for (uint256 i; i < allMarketParams.length; ++i) {
@@ -360,11 +360,11 @@ contract KontrolMorphoInvariantTest is KontrolInvariantTest {
                 sumSupplyShares += morpho.supplyShares(_id, users[j]);
             }
 
-            assertEq(sumSupplyShares, morpho.totalSupplyShares(_id), "vm.toString(_marketParams.lltv)");
+            assertEq(sumSupplyShares, morpho.totalSupplyShares(_id));
         }
     }
 
-    function invariantBorrowShares() public {
+    function test_invariantBorrowShares() public {
         address[] memory users = targetSenders();
 
         for (uint256 i; i < allMarketParams.length; ++i) {
@@ -376,11 +376,11 @@ contract KontrolMorphoInvariantTest is KontrolInvariantTest {
                 sumBorrowShares += morpho.borrowShares(_id, users[j]);
             }
 
-            assertEq(sumBorrowShares, morpho.totalBorrowShares(_id), "vm.toString(_marketParams.lltv)");
+            assertEq(sumBorrowShares, morpho.totalBorrowShares(_id));
         }
     }
 
-    function invariantTotalSupplyGeTotalBorrow() public {
+    function test_invariantTotalSupplyGeTotalBorrow() public {
         for (uint256 i; i < allMarketParams.length; ++i) {
             MarketParams memory _marketParams = allMarketParams[i];
             Id _id = _marketParams.id();
@@ -389,7 +389,7 @@ contract KontrolMorphoInvariantTest is KontrolInvariantTest {
         }
     }
 
-    function invariantMorphoBalance() public {
+    function test_invariantMorphoBalance() public {
         for (uint256 i; i < allMarketParams.length; ++i) {
             MarketParams memory _marketParams = allMarketParams[i];
             Id _id = _marketParams.id();
@@ -400,7 +400,7 @@ contract KontrolMorphoInvariantTest is KontrolInvariantTest {
         }
     }
 
-    function invariantBadDebt() public {
+    function test_invariantBadDebt() public {
         address[] memory users = targetSenders();
 
         for (uint256 i; i < allMarketParams.length; ++i) {
@@ -413,8 +413,7 @@ contract KontrolMorphoInvariantTest is KontrolInvariantTest {
                 if (morpho.collateral(_id, user) == 0) {
                     assertEq(
                         morpho.borrowShares(_id, user),
-                        0,
-                        string.concat("vm.toString(_marketParams.lltv)", ":", "vm.toString(user)")
+                        0
                     );
                 }
             }

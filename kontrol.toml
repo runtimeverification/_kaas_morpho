@@ -38,12 +38,9 @@ match-test                 = [
         'KontrolRepayIntegrationTest.testRepayZeroAmount',
         'KontrolRepayIntegrationTest.testRepayInconsistentInput',
         'KontrolRepayIntegrationTest.testRepayOnBehalfZeroAddress',
+        'KontrolRepayIntegrationTest.testRepayAssets',
+        'KontrolRepayIntegrationTest.testRepayShares',
         'KontrolRepayIntegrationTest.testRepayMax',
-        'KontrolMorphoInvariantTest.invariantMorphoBalance',
-        'KontrolMorphoInvariantTest.invariantTotalSupplyGeTotalBorrow',
-        'KontrolMorphoInvariantTest.invariantBadDebt',
-        'KontrolMorphoInvariantTest.invariantSupplyShares',
-        'KontrolMorphoInvariantTest.invariantBorrowShares'
     ]
 
 [show.default]
