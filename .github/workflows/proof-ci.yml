@@ -5,12 +5,6 @@
       inputs:
         branch_name:
           description: 'Branch Name of Clients code to Clone'
-          required: true
-        extra_args:
-          description: 'Additional Arguments to for run_kontro.sh '
-          required: false
-        statuses_sha:
-          description: 'SHA of the commit to report status back to'
           required: false
         org:
           description: 'Organization to report statuses back to'
@@ -18,14 +12,8 @@
         repository:
           description: 'Repository to report statuses back to'
           required: false
-        auth_token:
-          description: 'Auth Token w/ commit statuses permissions for reporting status'
-          required: false
-        skip_status_report:
-          description: 'Skip status report to github'
-          required: false
-          default: "false"
-  
+    pull_request:
+
   # Stop in progress workflows on the same branch and same workflow to use latest committed code
   concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.inputs.branch_name }}
@@ -43,29 +31,36 @@
             fetch-depth: 0
             path: .
 
-        - name: Report Pending Status
-          if: ${{ github.event.inputs.skip_status_report == 'false' }}
+            
+        # Set default values for org and repository if not provided
+        - name: 'Set default values'
           run: |
-            curl -L -X POST \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${{ github.event.inputs.auth_token }}" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              https://api.github.com/repos/${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}/statuses/${{ github.event.inputs.statuses_sha }} \
-              -d '{
-                "state": "pending",
-                "target_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                "description": "Proofs Pending",
-                "context": "runtimeverification/proof-runner"
-              }'
+            echo "ORG=${{ github.event.inputs.org || 'morpho-org' }}" >> $GITHUB_ENV
+            echo "REPOSITORY=${{ github.event.inputs.repository || 'morpho-blue' }}" >> $GITHUB_ENV
+
+        # - name: Report Pending Status
+        #   if: ${{ github.event.inputs.skip_status_report == 'false' }}
+        #   run: |
+        #     curl -L -X POST \
+        #       -H "Accept: application/vnd.github+json" \
+        #       -H "Authorization: Bearer ${{ github.event.inputs.auth_token }}" \
+        #       -H "X-GitHub-Api-Version: 2022-11-28" \
+        #       https://api.github.com/repos/${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}/statuses/${{ github.event.inputs.statuses_sha }} \
+        #       -d '{
+        #         "state": "pending",
+        #         "target_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+        #         "description": "Proofs Pending",
+        #         "context": "runtimeverification/proof-runner"
+        #       }'
         
         # Add this section to cehckout the client code. UPDATE the fields to match the client repository/org information -- Ideally client code is setup as a fork of the original repsoitory                             
         - name: Checkout CLIENT Code
           uses: actions/checkout@v4
           with:
-            repository: '${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}'
+            repository: '${{ env.ORG }}/${{ env.REPOSITORY }}'
             token: ${{ secrets.JENKINS_GITHUB_PAT }}
-            path: ./lib/${{ github.event.inputs.repository }}
-            # ref: ${{ github.event.inputs.branch_name }}
+            path: ./lib/${{ env.REPOSITORY }}
+            ref: ${{ github.event.inputs.branch_name || 'main' }}
             fetch-depth: 0
             submodules: 'recursive'
         
@@ -77,26 +72,9 @@
         - name: "Download KCFG Cache Results"
           shell: bash
           run: |
-            # Find the 'out' folder
-            OUT_DIR=$(find . -type d -name "out" | head -n 1)
-            if [ -z "$OUT_DIR" ]; then
-              echo "No 'out' folder found"
-              exit 1
-            else
-              echo "Found 'out' folder: $OUT_DIR"
-              OUT_DIR=$OUT_DIR" >> $GITHUB_ENV
-            fi
-            # Print contents of 'out' folder
-            echo "Contents of 'out' folder:"
-            ls -R "$OUT_DIR"
             tag=$(git hash-object kontrol.toml)
-<<<<<<< Updated upstream
             kaas-cli download --token ${{ secrets.VAULT_TOKEN }} @morpho/demo:$tag -d ./out
-      
-=======
-            kaas-cli download --token ${{ secrets.VAULT_TOKEN }} @morpho/demo:$tag -d $OUT_DIR
 
->>>>>>> Stashed changes
         # Some Setups Require using `pushd` to setup execution in the correct client directory
         # Some Setups require an additional step to pull all the necessary files, examples are `npm install` or `git submodule update --recursive` 
         - name: 'Run Kontrol'
@@ -104,8 +82,8 @@
           run: |
             # Step into Runtime Folder
             # Call Kontrol Directly and using 'local' mode or do not specify local/dev to run in a container
-            ./test/kontrol/scripts/run-kontrol.sh ${{ github.event.inputs.extra_args }}
-    
+            ./test/kontrol/scripts/run-kontrol.sh
+
         - name: 'KaaS Cache Upload'
           if: always()
           shell: bash
@@ -124,9 +102,6 @@
             ls -R "$OUT_DIR"
             # Enter directory where `out` folder is generated 
             tag=$(git hash-object kontrol.toml)
-<<<<<<< Updated upstream
-            kaas-cli upload --token ${{ secrets.VAULT_TOKEN }} @morpho/demo:$tag -d ./out
-=======
             kaas-cli upload --token ${{ secrets.VAULT_TOKEN }} @morpho/demo:$tag -d $OUT_DIR
         
         - name: Find Results File
@@ -142,44 +117,43 @@
               echo "Found results file: $RESULTS_FILE"
               echo "RESULTS_FILE=$RESULTS_FILE" >> $GITHUB_OUTPUT
             fi
->>>>>>> Stashed changes
       
         - name: 'Upload Results to GH Summary'
           if: always()
           uses: actions/upload-artifact@v4.3.1
           with:
             name: Kontrol Results
-            path: ./**/results-*.tar.gz
+            path: ${{ steps.find_results.outputs.RESULTS_FILE }}
             retention-days: 14
 
-        - name: Report Pass Status
-          if: always() && success() && ${{ github.event.inputs.skip_status_report == 'false' }}
-          run: |
-            curl -L -X POST \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${{ github.event.inputs.auth_token }}" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              https://api.github.com/repos/${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}/statuses/${{ github.event.inputs.statuses_sha }} \
-              -d '{
-                "state": "success",
-                "target_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                "description": "Client Proof Execution Success",
-                "context": "runtimeverification/proof-runner"
-              }'
+        # - name: Report Pass Status
+        #   if: always() && success() && ${{ github.event.inputs.skip_status_report == 'false' }}
+        #   run: |
+        #     curl -L -X POST \
+        #       -H "Accept: application/vnd.github+json" \
+        #       -H "Authorization: Bearer ${{ github.event.inputs.auth_token }}" \
+        #       -H "X-GitHub-Api-Version: 2022-11-28" \
+        #       https://api.github.com/repos/${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}/statuses/${{ github.event.inputs.statuses_sha }} \
+        #       -d '{
+        #         "state": "success",
+        #         "target_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+        #         "description": "Client Proof Execution Success",
+        #         "context": "runtimeverification/proof-runner"
+        #       }'
 
-        - name: Report Failure Status
-          if: always() && failure() || cancelled() && ${{ github.event.inputs.skip_status_report == 'false' }}
-          run: |
-            curl -L \
-              -X POST \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${{ secrets.JENKINS_GITHUB_PAT }}" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              https://api.github.com/repos/${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}/statuses/${{ github.event.inputs.statuses_sha }} \
-              -d '{
-                  "state":"failure",
-                  "target_url":"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                  "description":"Client Proof Execution Failure",
-                  "context":"runtimeverification/proof-runner"
-                }'
+        # - name: Report Failure Status
+        #   if: always() && failure() || cancelled() && ${{ github.event.inputs.skip_status_report == 'false' }}
+        #   run: |
+        #     curl -L \
+        #       -X POST \
+        #       -H "Accept: application/vnd.github+json" \
+        #       -H "Authorization: Bearer ${{ secrets.JENKINS_GITHUB_PAT }}" \
+        #       -H "X-GitHub-Api-Version: 2022-11-28" \
+        #       https://api.github.com/repos/${{ github.event.inputs.org }}/${{ github.event.inputs.repository }}/statuses/${{ github.event.inputs.statuses_sha }} \
+        #       -d '{
+        #           "state":"failure",
+        #           "target_url":"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+        #           "description":"Client Proof Execution Failure",
+        #           "context":"runtimeverification/proof-runner"
+        #         }'
     
