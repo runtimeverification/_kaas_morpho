@@ -2,7 +2,7 @@
 foundry-project-root       = '.'
 regen                      = true
 rekompile                  = true
-verbose                    = true
+verbose                    = false
 debug                      = false
 require                    = 'test/kontrol/morpho-lemmas.k'
 module-import              = 'KontrolRepayIntegrationTest:MORPHO-LEMMAS'
@@ -33,7 +33,18 @@ break-on-basic-blocks      = false
 break-on-cheatcodes        = false
 run-constructor            = false
 kore-rpc-command           = 'kore-rpc-booster --no-post-exec-simplify'
-match-test                 = ['KontrolRepayIntegrationTest.testRepayMarketNotCreated', 'KontrolRepayIntegrationTest.testRepayZeroAmount', 'KontrolRepayIntegrationTest.testRepayInconsistentInput', 'KontrolRepayIntegrationTest.testRepayOnBehalfZeroAddress', 'KontrolRepayIntegrationTest.testRepayMax']
+match-test                 = [
+        'KontrolRepayIntegrationTest.testRepayMarketNotCreated',
+        'KontrolRepayIntegrationTest.testRepayZeroAmount',
+        'KontrolRepayIntegrationTest.testRepayInconsistentInput',
+        'KontrolRepayIntegrationTest.testRepayOnBehalfZeroAddress',
+        'KontrolRepayIntegrationTest.testRepayMax',
+        'KontrolMorphoInvariantTest.invariantMorphoBalance',
+        'KontrolMorphoInvariantTest.invariantTotalSupplyGeTotalBorrow',
+        'KontrolMorphoInvariantTest.invariantBadDebt',
+        'KontrolMorphoInvariantTest.invariantSupplyShares',
+        'KontrolMorphoInvariantTest.invariantBorrowShares'
+    ]
 
 [show.default]
 foundry-project-root       = '.'
