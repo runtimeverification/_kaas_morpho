@@ -88,9 +88,21 @@
           if: always()
           shell: bash
           run: |
+            # Find the 'out' folder
+            OUT_DIR=$(find . -type d -name "out" | head -n 1)
+            if [ -z "$OUT_DIR" ]; then
+              echo "No 'out' folder found"
+              exit 1
+            else
+              echo "Found 'out' folder: $OUT_DIR"
+              OUT_DIR=$OUT_DIR" >> $GITHUB_ENV
+            fi
+            # Print contents of 'out' folder
+            echo "Contents of 'out' folder:"
+            ls -R "$OUT_DIR"
             # Enter directory where `out` folder is generated 
             tag=$(git hash-object kontrol.toml)
-            kaas-cli upload --token ${{ secrets.VAULT_TOKEN }} @morpho/demo:$tag -d ./out
+            kaas-cli upload --token ${{ secrets.VAULT_TOKEN }} @morpho/demo:$tag -d $OUT_DIR
         
         - name: Find Results File
           if: always()
