@@ -23,7 +23,7 @@ kontrol_build() {
 kontrol_prove() {
   notif "Kontrol Prove"
   # shellcheck disable=SC2086
-  run kontrol prove
+  run kontrol prove --symbolic-immutables
   return $?
 }
 
