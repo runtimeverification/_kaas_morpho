@@ -56,6 +56,30 @@ contract KontrolRepayIntegrationTest is KontrolBaseTest {
         return;
     }
 
+    function testBHPMinimumModel(
+      uint256 amountCollateral,
+      uint256 amountBorrowed,
+      uint256 priceCollateral
+    ) public returns (uint256) {
+        priceCollateral = 10000000000;
+        amountBorrowed = 2722258935368;
+
+        uint256 left;
+        uint256 right = MAX_TEST_AMOUNT;
+
+        uint256 minCollateral = amountBorrowed.wDivUp(marketParams.lltv).mulDivUp(ORACLE_PRICE_SCALE, priceCollateral);
+
+        if (minCollateral <= MAX_COLLATERAL_ASSETS) {
+            assertTrue(false);
+        } else {
+            amountCollateral = MAX_COLLATERAL_ASSETS;
+            left = amountBorrowed.wMulDown(marketParams.lltv).mulDivDown(priceCollateral, ORACLE_PRICE_SCALE);
+            assertTrue(left < right);
+        }
+
+        return left;
+    }
+
     function testRepayAssets(
         uint256 amountSupplied,
         uint256 amountCollateral,
