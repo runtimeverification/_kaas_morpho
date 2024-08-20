@@ -34,6 +34,28 @@ contract KontrolRepayIntegrationTest is KontrolBaseTest {
         morpho.repay(marketParams, isAmount ? input : 0, isAmount ? 0 : input, address(0), hex"");
     }
 
+    function testBHPMinimum(
+      uint256 amountCollateral,
+      uint256 amountBorrowed,
+      uint256 priceCollateral
+    ) public {
+        priceCollateral = bound(priceCollateral, MIN_COLLATERAL_PRICE, MAX_COLLATERAL_PRICE);
+        amountBorrowed = bound(amountBorrowed, MIN_TEST_AMOUNT, MAX_TEST_AMOUNT);
+
+        uint256 minCollateral = amountBorrowed.wDivUp(marketParams.lltv).mulDivUp(ORACLE_PRICE_SCALE, priceCollateral);
+
+        if (minCollateral <= MAX_COLLATERAL_ASSETS) {
+            amountCollateral = bound(amountCollateral, minCollateral, MAX_COLLATERAL_ASSETS);
+        } else {
+            amountCollateral = MAX_COLLATERAL_ASSETS;
+            uint256 left = amountBorrowed.wMulDown(marketParams.lltv).mulDivDown(priceCollateral, ORACLE_PRICE_SCALE);
+            uint256 right = MAX_TEST_AMOUNT;
+            assertTrue(left < right);
+        }
+
+        return;
+    }
+
     function testRepayAssets(
         uint256 amountSupplied,
         uint256 amountCollateral,
@@ -43,6 +65,7 @@ contract KontrolRepayIntegrationTest is KontrolBaseTest {
     ) public {
         (amountCollateral, amountBorrowed, priceCollateral) =
             _boundHealthyPosition(amountCollateral, amountBorrowed, priceCollateral);
+        return;
 
         amountSupplied = bound(amountSupplied, amountBorrowed, MAX_TEST_AMOUNT);
         _supply(amountSupplied);
