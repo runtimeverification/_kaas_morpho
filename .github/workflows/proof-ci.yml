@@ -73,6 +73,7 @@
           shell: bash
           run: |
             tag=$(git hash-object kontrol.toml)
+            echo $tag
             kaas-cli download --token ${{ secrets.VAULT_TOKEN }} @morpho/demo:$tag -d ./out
 
         # Some Setups Require using `pushd` to setup execution in the correct client directory
@@ -95,7 +96,7 @@
               exit 1
             else
               echo "Found 'out' folder: $OUT_DIR"
-              OUT_DIR=$OUT_DIR" >> $GITHUB_ENV
+              echo "OUT_DIR=$OUT_DIR" >> $GITHUB_ENV
             fi
             # Print contents of 'out' folder
             echo "Contents of 'out' folder:"
