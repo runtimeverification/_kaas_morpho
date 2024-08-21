@@ -32,8 +32,25 @@ usage_other() {
   exit 0
 }
 
-# Set Run Directory <root>/, This is where the foundtry.toml file generally is located.
-WORKSPACE_DIR=$( cd "$SCRIPT_HOME/../../.." >/dev/null 2>&1 && pwd )
+# Check if the current directory is a git repository
+is_git_repo() {
+  if git status &>/dev/null; then
+    echo "true"
+  else
+    echo "false"
+  fi
+}
+
+if is_git_repo; then
+  # Start at repository root and search for kontrol.toml
+  WORKSPACE_DIR=$(find "$(git rev-parse --show-toplevel)" -name kontrol.toml -exec dirname {} \; -quit)
+  if [[ -z "$WORKSPACE_DIR" ]]; then
+    WORKSPACE_DIR=$(git rev-parse --show-toplevel)
+  fi
+else
+  # Assume script home is 3 levels below root with the folder structure test/kontrol/scripts/
+  WORKSPACE_DIR=$(( cd "$SCRIPT_HOME/../../.." >/dev/null 2>&1 && pwd ))
+fi
 pushd "$WORKSPACE_DIR" > /dev/null || exit
 
 # Variables

@@ -1,26 +1,30 @@
 [build.default]
 foundry-project-root       = '.'
-regen                      = false
-rekompile                  = false
+regen                      = true
+rekompile                  = true
 verbose                    = false
 debug                      = false
-require                    = 'test/kontrol/counter-lemmas.k'
-module-import              = 'CounterTest:COUNTER-LEMMAS'
+require                    = 'test/kontrol/morpho-lemmas.k'
+module-import              = 'KontrolRepayIntegrationTest:MORPHO-LEMMAS'
 
 [prove.default]
+symbolic-immutables        = true
+assume-defined             = true
+no-log-rewrites            = true
 foundry-project-root       = '.'
 verbose                    = false
 debug                      = false
-max-depth                  = 1000000
-max-iterations             = 1000000
+max-depth                  = 100000
+max-iterations             = 10000
 reinit                     = false
 cse                        = false
 workers                    = 4
-failure-information        = true
-counterexample-information = true
+failure-information        = false
+counterexample-information = false
 minimize-proofs            = false
 fail-fast                  = true
-smt-timeout                = 100000
+smt-timeout                = 120000
+smt-retry-limit            = 0
 break-every-step           = false
 break-on-jumpi             = false
 break-on-calls             = false
@@ -28,10 +32,18 @@ break-on-storage           = false
 break-on-basic-blocks      = false
 break-on-cheatcodes        = false
 run-constructor            = false
-match-test                 = ['CounterTest.prove_SetNumber', 'proveSetOwnerWhenNotOwner', 'proveDeployWithAddressZero']
-# bug-report               = disabled by default
+kore-rpc-command           = 'kore-rpc-booster --no-post-exec-simplify'
+match-test                 = [
+        'KontrolRepayIntegrationTest.testRepayMarketNotCreated',
+        'KontrolRepayIntegrationTest.testRepayZeroAmount',
+        'KontrolRepayIntegrationTest.testRepayInconsistentInput',
+        'KontrolRepayIntegrationTest.testRepayOnBehalfZeroAddress',
+#       'KontrolRepayIntegrationTest.testRepayAssets',
+        'KontrolRepayIntegrationTest.testRepayShares',
+        'KontrolRepayIntegrationTest.testRepayMax',
+    ]
 
 [show.default]
 foundry-project-root       = '.'
-verbose                    = true
+verbose                    = false
 debug                      = false
