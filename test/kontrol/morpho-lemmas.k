@@ -478,6 +478,9 @@ module MORPHO-LEMMAS
       requires 0 <=Int A
       [simplification]
 
+    rule bool2Word(X) *Int Y ==Int Z => (X andBool (Y ==Int Z)) orBool ((notBool X) andBool Z ==Int 0)
+      [simplification]
+
 endmodule
 
 module MORPHO-LEMMAS-SPEC

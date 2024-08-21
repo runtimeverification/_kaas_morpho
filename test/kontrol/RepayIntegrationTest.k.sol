@@ -91,7 +91,6 @@ contract KontrolRepayIntegrationTest is KontrolBaseTest {
     ) public {
         (amountCollateral, amountBorrowed, priceCollateral) =
             _boundHealthyPosition(amountCollateral, amountBorrowed, priceCollateral);
-        return;
 
         amountSupplied = bound(amountSupplied, amountBorrowed, MAX_TEST_AMOUNT);
         _supply(amountSupplied);
