@@ -66,7 +66,7 @@ get_log_results(){
 #############
 # Set up the trap to run the function on failure
 trap on_failure ERR INT TERM
-trap clean_docker EXIT
+# trap clean_docker EXIT
 conditionally_start_docker
 
 results=()
