@@ -45,8 +45,8 @@ module MORPHO-LEMMAS
     rule A *Int B => B *Int A [simplification(30), symbolic(A), concrete(B)]
 
     // /Int
-    rule 0 /Int B         => 0         requires B =/=Int 0 [simplification, preserves-definedness]
-    rule A /Int B ==Int 0 => A ==Int 0 requires B =/=Int 0 [simplification, preserves-definedness]
+    rule 0 /Int B         => 0        requires B =/=Int 0                 [simplification, preserves-definedness]
+    rule A /Int B ==Int 0 => A <Int B requires 0 <=Int A andBool 0 <Int B [simplification, preserves-definedness]
 
     rule ( A *Int B ) /Int C => ( A /Int C ) *Int B requires A modInt C ==Int 0 [simplification, concrete(A, C), preserves-definedness]
 
@@ -532,6 +532,18 @@ module MORPHO-LEMMAS-SPEC
       andBool VV1_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
       andBool VV2_priceCollateral_114b9705:Int <=Int 10000000000000000000000000000000000000000
       andBool ( pow128 *Int VV2_priceCollateral_114b9705:Int ) <=Int ( ( VV2_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 1000000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) +Int 799999999999999999 ) /Int 800000000000000000 ) ) ) +Int -1 )
+
+    claim [zero-eq-left]:
+      <k> runLemma (
+        ( ( VV2_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) ==Word 0
+      ) => doneLemma (
+        true
+      ) ... </k>
+      requires 100 <=Int VV1_amountBorrowed_114b9705:Int
+       andBool 10000000000 <=Int VV2_priceCollateral_114b9705:Int
+       andBool VV1_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
+       andBool VV2_priceCollateral_114b9705:Int <=Int 10000000000000000000000000000000000000000
+       andBool ( pow128 *Int VV2_priceCollateral_114b9705:Int ) <=Int ( ( VV2_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 1000000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) +Int 799999999999999999 ) /Int 800000000000000000 ) ) ) +Int -1 )
 
 
 endmodule
