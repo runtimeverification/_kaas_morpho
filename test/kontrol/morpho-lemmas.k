@@ -474,12 +474,64 @@ module MORPHO-LEMMAS
       requires 0 <=Int N andBool N <Int lengthBytes(M)
       [simplification(60), symbolic(M), concrete(N), preserves-definedness]
 
-    // rule A <Int bool2Word(B) *Int C => B andBool A <Int C
-    //   requires 0 <=Int A
-    //   [simplification]
-
     rule bool2Word(B) *Int C <=Int A => notBool B orBool (B andBool C <=Int A)
       requires 0 <=Int A
       [simplification]
+
+endmodule
+
+module MORPHO-LEMMAS-SPEC
+    imports MORPHO-LEMMAS
+
+    claim [zero-lt-left]:
+      <k> runLemma (
+        0 <Int ( ( VV2_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 )
+      ) => doneLemma (
+        1000000000000000000000000000000000000 <=Int ( VV2_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) )
+      ) ... </k>
+      requires 100 <=Int VV1_amountBorrowed_114b9705:Int
+       andBool 10000000000 <=Int VV2_priceCollateral_114b9705:Int
+       andBool VV1_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
+       andBool VV2_priceCollateral_114b9705:Int <=Int 10000000000000000000000000000000000000000
+       andBool ( pow128 *Int VV2_priceCollateral_114b9705:Int ) <=Int ( ( VV2_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 1000000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) +Int 799999999999999999 ) /Int 800000000000000000 ) ) ) +Int -1 )
+
+
+    claim [left-gt-zero]:
+      <k> runLemma (
+        ( ( VV2_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) >Int 0
+      ) => doneLemma (
+        1000000000000000000000000000000000000 <=Int ( VV2_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) )
+      ) ... </k>
+      requires 100 <=Int VV1_amountBorrowed_114b9705:Int
+       andBool 10000000000 <=Int VV2_priceCollateral_114b9705:Int
+       andBool VV1_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
+       andBool VV2_priceCollateral_114b9705:Int <=Int 10000000000000000000000000000000000000000
+       andBool ( pow128 *Int VV2_priceCollateral_114b9705:Int ) <=Int ( ( VV2_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 1000000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) +Int 799999999999999999 ) /Int 800000000000000000 ) ) ) +Int -1 )
+
+    claim [zero-ge-left]:
+      <k> runLemma (
+        0 >=Int ( ( VV2_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 )
+      ) => doneLemma (
+        ( VV2_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) <Int 1000000000000000000000000000000000000
+      ) ... </k>
+    requires 100 <=Int VV1_amountBorrowed_114b9705:Int
+       andBool 10000000000 <=Int VV2_priceCollateral_114b9705:Int
+       andBool VV1_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
+       andBool VV2_priceCollateral_114b9705:Int <=Int 10000000000000000000000000000000000000000
+       andBool ( pow128 *Int VV2_priceCollateral_114b9705:Int ) <=Int ( ( VV2_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 1000000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) +Int 799999999999999999 ) /Int 800000000000000000 ) ) ) +Int -1 )
+
+
+    claim [left-le-zero]:
+      <k> runLemma (
+        ( ( VV2_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) <=Int 0
+      ) => doneLemma (
+        ( VV2_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) <Int 1000000000000000000000000000000000000
+      ) ... </k>
+    requires 100 <=Int VV1_amountBorrowed_114b9705:Int
+      andBool 10000000000 <=Int VV2_priceCollateral_114b9705:Int
+      andBool VV1_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
+      andBool VV2_priceCollateral_114b9705:Int <=Int 10000000000000000000000000000000000000000
+      andBool ( pow128 *Int VV2_priceCollateral_114b9705:Int ) <=Int ( ( VV2_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 1000000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) +Int 799999999999999999 ) /Int 800000000000000000 ) ) ) +Int -1 )
+
 
 endmodule
