@@ -533,17 +533,4 @@ module MORPHO-LEMMAS-SPEC
       andBool VV2_priceCollateral_114b9705:Int <=Int 10000000000000000000000000000000000000000
       andBool ( pow128 *Int VV2_priceCollateral_114b9705:Int ) <=Int ( ( VV2_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 1000000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) +Int 799999999999999999 ) /Int 800000000000000000 ) ) ) +Int -1 )
 
-    claim [zero-eq-left]:
-      <k> runLemma (
-        ( ( VV2_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) ==Word 0
-      ) => doneLemma (
-        true
-      ) ... </k>
-      requires 100 <=Int VV1_amountBorrowed_114b9705:Int
-       andBool 10000000000 <=Int VV2_priceCollateral_114b9705:Int
-       andBool VV1_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
-       andBool VV2_priceCollateral_114b9705:Int <=Int 10000000000000000000000000000000000000000
-       andBool ( pow128 *Int VV2_priceCollateral_114b9705:Int ) <=Int ( ( VV2_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 1000000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) +Int 799999999999999999 ) /Int 800000000000000000 ) ) ) +Int -1 )
-
-
 endmodule
