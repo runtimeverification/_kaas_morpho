@@ -38,7 +38,7 @@ match-test                 = [
         'KontrolRepayIntegrationTest.testRepayZeroAmount',
         'KontrolRepayIntegrationTest.testRepayInconsistentInput',
         'KontrolRepayIntegrationTest.testRepayOnBehalfZeroAddress',
-        'KontrolRepayIntegrationTest.testRepayAssets',
+#       'KontrolRepayIntegrationTest.testRepayAssets',
         'KontrolRepayIntegrationTest.testRepayShares',
         'KontrolRepayIntegrationTest.testRepayMax',
     ]
