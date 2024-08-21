@@ -38,7 +38,7 @@ contract KontrolRepayIntegrationTest is KontrolBaseTest {
       uint256 amountCollateral,
       uint256 amountBorrowed,
       uint256 priceCollateral
-    ) public {
+    ) public returns (uint256){
         priceCollateral = bound(priceCollateral, MIN_COLLATERAL_PRICE, MAX_COLLATERAL_PRICE);
         amountBorrowed = bound(amountBorrowed, MIN_TEST_AMOUNT, MAX_TEST_AMOUNT);
 
@@ -51,9 +51,11 @@ contract KontrolRepayIntegrationTest is KontrolBaseTest {
             uint256 left = amountBorrowed.wMulDown(marketParams.lltv).mulDivDown(priceCollateral, ORACLE_PRICE_SCALE);
             uint256 right = MAX_TEST_AMOUNT;
             assertTrue(left < right);
+            amountBorrowed = left;
         }
 
-        return;
+        vm.assume(amountBorrowed > 0);
+        return amountBorrowed;
     }
 
     function testBHPMinimumModel(
