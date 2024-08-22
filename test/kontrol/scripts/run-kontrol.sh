@@ -28,11 +28,11 @@ kontrol_prove() {
 }
 
 get_log_results(){
-  trap clean_docker ERR
+    # trap clean_docker ERR
     RESULTS_FILE="results-$(date +'%Y-%m-%d-%H-%M-%S').tar.gz"
     LOG_PATH="$SCRIPT_HOME/logs"
     RESULTS_LOG="$LOG_PATH/$RESULTS_FILE"
-
+    echo "FETCH LOGS"
     if [ ! -d $LOG_PATH ]; then
       mkdir $LOG_PATH
     fi
@@ -66,18 +66,23 @@ get_log_results(){
 #############
 # Set up the trap to run the function on failure
 trap on_failure ERR INT TERM
-trap clean_docker EXIT
+# trap clean_docker EXIT
 conditionally_start_docker
 
 results=()
 # Run kontrol_build and store the result
+echo "START BUILD"
 kontrol_build
 results[0]=$?
+echo "BUILD FINISHED"
 
 # Run kontrol_prove and store the result
+echo "START PROVE"
 kontrol_prove
 results[1]=$?
+echo "PROVE FINISHED"
 
+echo "FETCH LOGS"
 get_log_results
 
 # Now you can use ${results[0]} and ${results[1]}
