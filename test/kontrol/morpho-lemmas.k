@@ -265,17 +265,25 @@ module MORPHO-LEMMAS
     rule [chop-no-overflow-mul-r]: X:Int <=Int chop ( Y *Int X:Int ) => X *Int Y <Int pow256 requires #rangeUInt(256, X) andBool #rangeUInt(256, Y)             [simplification]
     rule [chop-no-overflow-div]:   X:Int <=Int chop ( X /Int Y:Int ) => X /Int Y <Int pow256 requires #rangeUInt(256, X) andBool 0 <Int Y andBool Y <Int pow256 [simplification]
 
+    // Slot updates are performed by the compiler with the help of masks,
+    // which are 256-bit integers of the form 11111111100000000000111111111111111
+    //                                                 |- WIDTH -||-   SHIFT   -|
+
+    // ###########################################################################
+    // Auxiliaries
+    // ###########################################################################
+
     // Index of first bit that equals one
     syntax Int ::=  #getFirstOneBit(Int) [function, total]
 
-    rule [gfo-succ]: #getFirstOneBit(X:Int) => log2Int ( X &Int ( ( maxUInt256 xorInt X ) +Int 1 ) ) requires          #rangeUInt(256, X) andBool X =/=Int 0  [concrete(X), simplification]
-    rule [gfo-fail]: #getFirstOneBit(X:Int) => -1                                                    requires notBool (#rangeUInt(256, X) andBool X =/=Int 0) [concrete(X), simplification]
+    rule [gfo-succ]: #getFirstOneBit(X:Int) => log2Int ( X &Int ( ( maxUInt256 xorInt X ) +Int 1 ) ) requires          #rangeUInt(256, X) andBool X =/=Int 0
+    rule [gfo-fail]: #getFirstOneBit(X:Int) => -1                                                    requires notBool (#rangeUInt(256, X) andBool X =/=Int 0)
 
     // Index of first bit that equals zero
     syntax Int ::= #getFirstZeroBit(Int) [function, total]
 
-    rule [gfz-succ]: #getFirstZeroBit(X:Int) => #getFirstOneBit ( maxUInt256 xorInt X ) requires         #rangeUInt(256, X) [concrete(X), simplification]
-    rule [gfz-fail]: #getFirstZeroBit(X:Int) => -1                                      requires notBool #rangeUInt(256, X) [concrete(X), simplification]
+    rule [gfz-succ]: #getFirstZeroBit(X:Int) => #getFirstOneBit ( maxUInt256 xorInt X ) requires         #rangeUInt(256, X)
+    rule [gfz-fail]: #getFirstZeroBit(X:Int) => -1                                      requires notBool #rangeUInt(256, X)
 
     // Slot updates are performed by the compiler with the help of masks,
     // which are 256-bit integers of the form 11111111100000000000111111111111111
@@ -481,6 +489,28 @@ module MORPHO-LEMMAS
     rule bool2Word(X) *Int Y ==Int Z => (X andBool (Y ==Int Z)) orBool ((notBool X) andBool Z ==Int 0)
       [simplification]
 
+    rule X *Int Y <=Int Z => Y <Int ( Z +Int 1 ) /Int X
+      requires 0 <Int X andBool 0 <=Int Z andBool ( Z +Int 1) modInt X ==Int 0
+      [simplification, concrete(X, Z), preserves-definedness]
+
+    rule C <=Int A *Int B => C /Int A <=Int B
+      requires 0 <=Int C andBool 0 <Int A
+       andBool C modInt A ==Int 0
+       [simplification(40), concrete(C, A), preserves-definedness]
+
+    rule A ==Int B => false
+      requires 0 <=Int A andBool B <Int 0
+      [simplification, concrete(B)]
+
+    rule 0 <=Int A -Int B => B <=Int A
+      [simplification, symbolic(A, B)]
+
+    // TODO: Is this correct?
+    rule ( ( A *Int B ) +Int C ) /Int D => ( ( ( A /Int 10 ) *Int B ) +Int ( ( D /Int 10 ) -Int 1 ) ) /Int ( D /Int 10 )
+      requires 0 <=Int A andBool 0 <Int D
+       andBool A modInt 10 ==Int 0 andBool D modInt 10 ==Int 0 andBool C ==Int D -Int 1
+       [simplification, concrete(A, C, D), preserves-definedness]
+
 endmodule
 
 module MORPHO-LEMMAS-SPEC
@@ -535,5 +565,113 @@ module MORPHO-LEMMAS-SPEC
       andBool VV1_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
       andBool VV2_priceCollateral_114b9705:Int <=Int 10000000000000000000000000000000000000000
       andBool ( pow128 *Int VV2_priceCollateral_114b9705:Int ) <=Int ( ( VV2_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 1000000000000000000 *Int VV1_amountBorrowed_114b9705:Int ) +Int 799999999999999999 ) /Int 800000000000000000 ) ) ) +Int -1 )
+
+    claim [pre-pre-chop]:
+      <k> runLemma (
+        ( pow128 *Int VV4_priceCollateral_114b9705:Int ) <=Int maxUInt256
+      ) => doneLemma (
+        VV4_priceCollateral_114b9705 <Int pow128
+      ) ... </k>
+
+    claim [pre-chop-1]:
+      <k> runLemma (
+        0 <=Int ( pow128 *Int ( maxUInt128 &Int ( ( 1000000 *Int ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) ) -Int ( ( ( ( 1000000 *Int ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) ) +Int 1000000 ) *Int VV3_amountRepaid_114b9705:Int ) /Int ( ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) +Int 1 ) ) ) ) )
+      ) => doneLemma (
+        true
+      ) ... </k>
+      requires 1 <=Int VV3_amountRepaid_114b9705:Int
+       andBool 100 <=Int VV2_amountBorrowed_114b9705:Int
+       andBool 10000000000 <=Int VV4_priceCollateral_114b9705:Int
+       andBool VV2_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
+       andBool VV4_priceCollateral_114b9705:Int <Int pow128
+       andBool 1000000000000000000000000000000000000 <=Int ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) )
+       andBool ( 1000000000000000000000000000000000000 *Int VV3_amountRepaid_114b9705:Int ) <=Int ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) )
+       andBool ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) <Int ( 1000000000000000000000000000000000000 *Int ( VV0_amountSupplied_114b9705:Int +Int 1 ) )
+       andBool ( pow128 *Int VV4_priceCollateral_114b9705:Int ) <=Int ( ( VV4_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 1000000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) +Int 799999999999999999 ) /Int 800000000000000000 ) ) ) +Int -1 )
+
+    claim [pre-chop-2]:
+      <k> runLemma (
+        ( pow128 *Int ( maxUInt128 &Int ( ( 1000000 *Int ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) ) -Int ( ( ( ( 1000000 *Int ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) ) +Int 1000000 ) *Int VV3_amountRepaid_114b9705:Int ) /Int ( ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) +Int 1 ) ) ) ) ) <Int pow256
+      ) => doneLemma (
+        true
+      ) ... </k>
+      requires 1 <=Int VV3_amountRepaid_114b9705:Int
+       andBool 100 <=Int VV2_amountBorrowed_114b9705:Int
+       andBool 10000000000 <=Int VV4_priceCollateral_114b9705:Int
+       andBool VV2_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
+       andBool VV4_priceCollateral_114b9705:Int <Int pow128
+       andBool 1000000000000000000000000000000000000 <=Int ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) )
+       andBool ( 1000000000000000000000000000000000000 *Int VV3_amountRepaid_114b9705:Int ) <=Int ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) )
+       andBool ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) <Int ( 1000000000000000000000000000000000000 *Int ( VV0_amountSupplied_114b9705:Int +Int 1 ) )
+       andBool ( pow128 *Int VV4_priceCollateral_114b9705:Int ) <=Int ( ( VV4_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 1000000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) +Int 799999999999999999 ) /Int 800000000000000000 ) ) ) +Int -1 )
+
+    claim [chop-chop]:
+      <k> runLemma (
+        ( chop ( ( pow128 *Int ( maxUInt128 &Int ( ( 1000000 *Int ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) ) -Int ( ( ( ( 1000000 *Int ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) ) +Int 1000000 ) *Int VV3_amountRepaid_114b9705:Int ) /Int ( ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) +Int 1 ) ) ) ) ) ) |Int ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) )
+      ) => doneLemma (
+        true
+      ) ... </k>
+      requires 1 <=Int VV3_amountRepaid_114b9705:Int
+       andBool 100 <=Int VV2_amountBorrowed_114b9705:Int
+       andBool 10000000000 <=Int VV4_priceCollateral_114b9705:Int
+       andBool VV2_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
+       andBool VV4_priceCollateral_114b9705:Int <Int pow128
+       andBool 1000000000000000000000000000000000000 <=Int ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) )
+       andBool ( 1000000000000000000000000000000000000 *Int VV3_amountRepaid_114b9705:Int ) <=Int ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) )
+       andBool ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) <Int ( 1000000000000000000000000000000000000 *Int ( VV0_amountSupplied_114b9705:Int +Int 1 ) )
+       andBool ( pow128 *Int VV4_priceCollateral_114b9705:Int ) <=Int ( ( VV4_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 1000000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) +Int 799999999999999999 ) /Int 800000000000000000 ) ) ) +Int -1 )
+
+    claim [zero-gt-expr]:
+      <k> runLemma (
+        0 <=Int ( ( 1000000 *Int ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) ) -Int ( ( ( ( 1000000 *Int ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) ) +Int 1000000 ) *Int VV3_amountRepaid_114b9705:Int ) /Int ( ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) +Int 1 ) ) )
+      ) => doneLemma (
+        true
+      ) ... </k>
+      requires 0 <=Int VV3_amountRepaid_114b9705:Int
+       andBool 1 <=Int VV3_amountRepaid_114b9705:Int
+       andBool 0 <=Int VV2_amountBorrowed_114b9705:Int
+       andBool 0 <=Int VV4_priceCollateral_114b9705:Int
+       andBool 100 <=Int VV2_amountBorrowed_114b9705:Int
+       andBool 10000000000 <=Int VV4_priceCollateral_114b9705:Int
+       andBool VV2_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
+       andBool VV4_priceCollateral_114b9705:Int <=Int 10000000000000000000000000000000000000000
+       andBool VV3_amountRepaid_114b9705:Int <Int pow256
+       andBool VV2_amountBorrowed_114b9705:Int <Int pow256
+       andBool VV4_priceCollateral_114b9705:Int <Int pow256
+       andBool ( maxUInt128 *Int VV4_priceCollateral_114b9705:Int ) <=Int maxUInt256
+       andBool 1000000000000000000000000000000000000 <=Int ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) )
+       andBool ( 1000000000000000000000000000000000000 *Int VV3_amountRepaid_114b9705:Int ) <=Int ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) )
+       andBool ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) <Int ( 1000000000000000000000000000000000000 *Int ( VV0_amountSupplied_114b9705:Int +Int 1 ) )
+       andBool ( pow128 *Int VV4_priceCollateral_114b9705:Int ) <=Int ( ( VV4_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 10 *Int VV2_amountBorrowed_114b9705:Int ) +Int 7 ) /Int 8 ) ) ) +Int -1 )
+
+    claim [expr-lt-pow128]:
+      <k> runLemma (
+        ( ( 1000000 *Int ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) ) -Int ( ( ( ( 1000000 *Int ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) ) +Int 1000000 ) *Int VV3_amountRepaid_114b9705:Int ) /Int ( ( ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) /Int 1000000000000000000000000000000000000 ) +Int 1 ) ) ) <Int pow128
+      ) => doneLemma (
+        true
+      ) ... </k>
+      requires 0 <=Int VV3_amountRepaid_114b9705:Int
+       andBool 1 <=Int VV3_amountRepaid_114b9705:Int
+       andBool 0 <=Int VV2_amountBorrowed_114b9705:Int
+       andBool 0 <=Int VV4_priceCollateral_114b9705:Int
+       andBool 100 <=Int VV2_amountBorrowed_114b9705:Int
+       andBool 10000000000 <=Int VV4_priceCollateral_114b9705:Int
+       andBool VV2_amountBorrowed_114b9705:Int <=Int 10000000000000000000000000000
+       andBool VV4_priceCollateral_114b9705:Int <=Int 10000000000000000000000000000000000000000
+       andBool VV3_amountRepaid_114b9705:Int <Int pow256
+       andBool VV2_amountBorrowed_114b9705:Int <Int pow256
+       andBool VV4_priceCollateral_114b9705:Int <Int pow256
+       andBool ( maxUInt128 *Int VV4_priceCollateral_114b9705:Int ) <=Int maxUInt256
+       andBool 1000000000000000000000000000000000000 <=Int ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) )
+       andBool ( 1000000000000000000000000000000000000 *Int VV3_amountRepaid_114b9705:Int ) <=Int ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) )
+       andBool ( VV4_priceCollateral_114b9705:Int *Int ( ( 800000000000000000 *Int VV2_amountBorrowed_114b9705:Int ) /Int 1000000000000000000 ) ) <Int ( 1000000000000000000000000000000000000 *Int ( VV0_amountSupplied_114b9705:Int +Int 1 ) )
+       andBool ( pow128 *Int VV4_priceCollateral_114b9705:Int ) <=Int ( ( VV4_priceCollateral_114b9705:Int +Int ( 1000000000000000000000000000000000000 *Int ( ( ( 10 *Int VV2_amountBorrowed_114b9705:Int ) +Int 7 ) /Int 8 ) ) ) +Int -1 )
+
+    claim [gfob-pow128]:
+      <k> runLemma (
+        #getFirstOneBit(notMaxUInt128)
+      ) => doneLemma (
+        128
+      ) ... </k>
 
 endmodule
