@@ -505,12 +505,6 @@ module MORPHO-LEMMAS
     rule 0 <=Int A -Int B => B <=Int A
       [simplification, symbolic(A, B)]
 
-    // TODO: Is this correct?
-    rule ( ( A *Int B ) +Int C ) /Int D => ( ( ( A /Int 10 ) *Int B ) +Int ( ( D /Int 10 ) -Int 1 ) ) /Int ( D /Int 10 )
-      requires 0 <=Int A andBool 0 <Int D
-       andBool A modInt 10 ==Int 0 andBool D modInt 10 ==Int 0 andBool C ==Int D -Int 1
-       [simplification, concrete(A, C, D), preserves-definedness]
-
 endmodule
 
 module MORPHO-LEMMAS-SPEC
