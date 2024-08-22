@@ -82,6 +82,7 @@ contract KontrolRepayIntegrationTest is KontrolBaseTest {
         return left;
     }
 
+    // 7m 40s, || 4, MR 24, SMT 5s
     function testRepayAssets(
         uint256 amountSupplied,
         uint256 amountCollateral,
@@ -126,6 +127,7 @@ contract KontrolRepayIntegrationTest is KontrolBaseTest {
         assertEq(loanToken.balanceOf(address(morpho)), amountSupplied - amountBorrowed + amountRepaid, "morpho balance");
     }
 
+    // 8m 14s, || 4, MR 24, SMT 5s
     function testRepayShares(
         uint256 amountSupplied,
         uint256 amountCollateral,
@@ -174,6 +176,7 @@ contract KontrolRepayIntegrationTest is KontrolBaseTest {
         );
     }
 
+    // 4m 20s, || 4, MR 24, SMT 5s
     function testRepayMax(uint256 shares) public {
         shares = bound(shares, MIN_TEST_SHARES, MAX_TEST_SHARES);
 
