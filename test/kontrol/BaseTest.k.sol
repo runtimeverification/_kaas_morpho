@@ -194,7 +194,7 @@ contract KontrolBaseTest is Test {
         }
 
         vm.assume(amountBorrowed > 0);
-        vm.assume(amountCollateral < type(uint256).max / priceCollateral);
+        vm.assume(amountCollateral <= type(uint256).max / priceCollateral);
         return (amountCollateral, amountBorrowed, priceCollateral);
     }
 
