@@ -4,6 +4,7 @@ regen                      = true
 rekompile                  = true
 verbose                    = false
 debug                      = false
+auxiliary-lemmas           = true
 require                    = 'test/kontrol/morpho-lemmas.k'
 module-import              = 'KontrolRepayIntegrationTest:MORPHO-LEMMAS'
 
